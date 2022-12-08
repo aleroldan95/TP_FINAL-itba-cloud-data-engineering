@@ -17,7 +17,7 @@ print(tweepy.__version__)
 host = 'maslabase.c5ahny2xlnzd.us-east-1.rds.amazonaws.com'
 user = 'lospibes'
 passwd = 'scaloneta123'
-db_name = 'maslabase'
+db_name = 'tweets_original'
 
 credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
 'consumer_secret' : "jVyQ4OpqAWr2EnNdqHWYKhvqqaaoJiZOV2WqNw5ZlIioJftGgJ",
@@ -87,8 +87,10 @@ def insert_tweet(**context):
     df_tweets = pd.read_json(
         task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
         orient="index",
-    )
-    df_tweets = df_tweets['index', 'Id', 'Created_On', 'text']
+    ).T
+    print(df_tweets)
+    print(df_tweets.columns)
+    df_tweets = df_tweets[['index', 'Id', 'Created_On', 'text']]
     # Appending Data to database:
     engine = create_engine(
         "mysql+mysqlconnector://{user}:{pwd}@{host}/{db}".format(user=user, pwd=passwd, host=host, db=db_name))
