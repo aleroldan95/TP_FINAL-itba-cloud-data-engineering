@@ -22,7 +22,6 @@ credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
 'access_token_secret' : "oBF6mPb9E95W6QXSXDKD2yyM0qsBJ7xrm5LRQmGLtid0m"}
 
 userID = 'CarlosMaslaton'
-from_date = (datetime.now() + timedelta(days=-1)).date().strftime('%Y-%m-%d')
 
 SQL_TABLE='masla_tweets'
 
@@ -60,9 +59,19 @@ def tweet_downloader(userID, from_date, credentials):
 
         print("...{} tweets downloaded so far".format(len(alltweets)))
 
-    return alltweets[:-1]
+    filtered = []
+
+    for i in alltweets:
+        if i.created_at > since_date:
+            filtered.append(i)
+
+    return filtered
+
 
 def dag_tweet_downloader(**context):
+    from_date = (datetime.strptime(context["ds"], "%Y-%m-%d") - timedelta(days=1)).strftime(
+        "%Y-%m-%d"
+    )
     # Authorize our Twitter credentials
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
