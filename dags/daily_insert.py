@@ -6,6 +6,7 @@ from postgres import Postgres
 import sqlalchemy.exc
 from sentiment_analysis_spanish import sentiment_analysis
 import json
+import boto3
 
 from datetime import datetime, timedelta
 
@@ -136,6 +137,23 @@ def insert_sentiment(**context):
     except sqlalchemy.exc.IntegrityError:
         print("Data already exists! Nothing to do...")
 
+def sentiment_tweet(**context):
+    aws_details = json.loads(Variable.get("aws_details"))
+    s3_client = boto3.client('s3'
+                             , aws_access_key_id=aws_details["aws_access_key_id"]
+                             , aws_secret_access_key=aws_details["aws_secret_access_key"],
+                             aws_session_token=aws_details["aws_session_token"])
+
+    s3_client.download_file("maslaton-moods", "bullish.jpeg", "/tmp/bullish.png")
+
+    imagePath = "/tmp/bullish.png"
+    status = "Testeando desde Airflow"
+
+    credentials = json.loads(Variable.get("credentials"))
+    auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
+    auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
+    api = tweepy.API(auth)
+    api.update_status_with_media(status=status, filename=imagePath)
 
 default_args = {"owner": "lospi", "retries": 0, "retry_delay": timedelta(minutes=0)}
 with DAG(
@@ -160,4 +178,9 @@ with DAG(
         python_callable=insert_sentiment
     )
 
-    dag_tweet_downloader >> insert_tweet >> insert_sentiment
+    sentiment_tweet = PythonOperator(
+        task_id="sentiment_tweet",
+        python_callable=sentiment_tweet
+    )
+
+    dag_tweet_downloader >> [insert_tweet,insert_sentiment] >> sentiment_tweet

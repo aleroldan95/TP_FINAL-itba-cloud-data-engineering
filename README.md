@@ -1,10 +1,10 @@
-##Trabajo Práctico integratorio final de la certificación en data engineering del ITBA
+## Trabajo Práctico integratorio final de la certificación en data engineering del ITBA
 
-###**Objetivo**
+### **Objetivo**
 
 Definir si Masla está feliz o triste
 
-###**Metodología**
+### **Metodología**
 
 1° Creación de elementos necesarios de AWS para realizar el proyecto: <br />
 - RDS: utilizamos una base de datos Postgres, a la cuál solo se puede acceder desde la EC2 <br />
