@@ -21,7 +21,7 @@ def create_table_if_not_exists():
 with DAG(
     dag_id="create_table_tweets_daily",
     default_args=default_args,
-    #start_date=datetime(2022, 10, 6),
+    start_date=datetime(2022, 12, 17),
     schedule_interval="@once",
 ) as dag:
     create_table_if_not_exists = PythonOperator(
