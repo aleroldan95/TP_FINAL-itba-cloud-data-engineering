@@ -6,6 +6,7 @@ from mysql.connector import errorcode
 from sqlalchemy import create_engine
 from airflow.operators.python import PythonOperator
 from airflow import DAG
+from dags.postgres import Postgres
 
 from datetime import datetime, timedelta
 
@@ -14,19 +15,16 @@ import tweepy
 import datetime as dt
 print(tweepy.__version__)
 
-host = 'maslabase.c5ahny2xlnzd.us-east-1.rds.amazonaws.com'
-user = 'lospibes'
-passwd = 'scaloneta123'
-db_name = 'tweets_original'
-
 credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
 'consumer_secret' : "jVyQ4OpqAWr2EnNdqHWYKhvqqaaoJiZOV2WqNw5ZlIioJftGgJ",
 'access_token' : "1545748698965200902-aHhEz4NIqhjAsNHcC4ORvVg6bMTdiH",
 'access_token_secret' : "oBF6mPb9E95W6QXSXDKD2yyM0qsBJ7xrm5LRQmGLtid0m"}
 
-
 userID = 'CarlosMaslaton'
 from_date = (datetime.now() + timedelta(days=-1)).date().strftime('%Y-%m-%d')
+
+SQL_TABLE='masla_tweets'
+
 
 def tweet_downloader(userID, from_date, credentials):
     # Authorize our Twitter credentials
@@ -88,13 +86,21 @@ def insert_tweet(**context):
         task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
         orient="index",
     ).T
-    print(df_tweets)
-    print(df_tweets.columns)
     df_tweets = df_tweets[['index', 'Id', 'Created_On', 'text']]
     # Appending Data to database:
-    engine = create_engine(
-        "mysql+mysqlconnector://{user}:{pwd}@{host}/{db}".format(user=user, pwd=passwd, host=host, db=db_name))
-    df_tweets.to_sql(db_name, con=engine, if_exists='append')
+    postgres = Postgres("postgres_maslabot")
+    try:
+        postgres.insert_from_frame(
+            df=df_tweets, table=SQL_TABLE, if_exists="append", index=False
+        )
+        print(f"Inserted {len(df_tweets)} records")
+    except sqlalchemy.exc.IntegrityError:
+        # You can avoid doing this by setting a trigger rule in the reports operator
+        print("Data already exists! Nothing to do...")
+
+    #engine = create_engine(
+    #    "mysql+mysqlconnector://{user}:{pwd}@{host}/{db}".format(user=user, pwd=passwd, host=host, db=db_name))
+    #df_tweets.to_sql(db_name, con=engine, if_exists='append')
 
 default_args = {"owner": "lospi", "retries": 0, "retry_delay": timedelta(minutes=0)}
 with DAG(

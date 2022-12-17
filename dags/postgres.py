@@ -1,15 +1,12 @@
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from sqlalchemy.inspection import inspect
-from sqlalchemy.engine.reflection import Inspector
-from sqlalchemy.engine import Engine
-from models import Base
 import pandas as pd
 
 
 class Postgres:
     def __init__(self, postgres_conn_id):
         self.postgres_conn_id = postgres_conn_id
-        self.pg_hook = PostgresHook(postgres_conn_id="postgres_localhost")
+        self.pg_hook = PostgresHook(postgres_conn_id=postgres_conn_id)
 
     def _get_inspector(self):
         return inspect(self._get_engine())

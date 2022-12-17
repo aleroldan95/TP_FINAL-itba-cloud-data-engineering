@@ -6,7 +6,7 @@ from time import sleep
 
 # import plotly.express as px
 
-from postgres import Postgres
+from dags.postgres import Postgres
 import requests
 import json
 import numpy as np

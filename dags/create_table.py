@@ -14,13 +14,13 @@ def create_table_if_not_exists():
     pg_hook = PostgresHook(postgres_conn_id="postgres_maslabot")
     pg_engine: Engine = pg_hook.get_sqlalchemy_engine()
     pg_inspector: Inspector = inspect(pg_engine)
-    table_names: [str] = pg_inspector.get_table_names(schema="datebase-maslabot")
+    table_names: [str] = pg_inspector.get_table_names(schema="maslabot")
     if "masla_tweets" not in table_names:
         Base.metadata.create_all(pg_engine)
 
 
 with DAG(
-    dag_id="create_table_stock_daily",
+    dag_id="create_table_tweets_daily",
     default_args=default_args,
     start_date=datetime(2022, 10, 6),
     schedule_interval="0 0 * * *",
