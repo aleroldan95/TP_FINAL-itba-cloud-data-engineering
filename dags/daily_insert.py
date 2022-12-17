@@ -137,17 +137,26 @@ def insert_sentiment(**context):
     except sqlalchemy.exc.IntegrityError:
         print("Data already exists! Nothing to do...")
 
+    median_sentiment = str(df_tweets['sentiment'].astype('float').median())
+
+    return median_sentiment
+
 def sentiment_tweet(**context):
+    median_sentiment = context["ti"].xcom_pull(task_ids='insert_sentiment')
     aws_details = json.loads(Variable.get("aws_details"))
     s3_client = boto3.client('s3'
                              , aws_access_key_id=aws_details["aws_access_key_id"]
                              , aws_secret_access_key=aws_details["aws_secret_access_key"],
                              aws_session_token=aws_details["aws_session_token"])
 
-    s3_client.download_file("maslaton-moods", "bullish.jpeg", "/tmp/bullish.png")
-
-    imagePath = "/tmp/bullish.png"
-    status = "Testeando desde Airflow"
+    if median_sentiment>0.1:
+        s3_client.download_file("maslaton-moods", "bullish.jpeg", "/tmp/bullish.png")
+        imagePath = "/tmp/bullish.png"
+        status = f"""Masla status: bullish ({median_sentiment})"""
+    else:
+        s3_client.download_file("maslaton-moods", "bearish.jpeg", "/tmp/bearish.png")
+        imagePath = "/tmp/bearish.png"
+        status = f"""Masla status: bearish ({median_sentiment})"""
 
     credentials = json.loads(Variable.get("credentials"))
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
