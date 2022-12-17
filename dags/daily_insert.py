@@ -86,8 +86,11 @@ def insert_tweet(**context):
         task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
         orient="index",
     ).T
+    print(df_tweets)
     df_tweets.rename(columns={"Created_On": "date", "Id": "id"})
+    print(df_tweets)
     df_tweets = df_tweets[['id', 'date', 'text']]
+    print(df_tweets)
     # Appending Data to database:
     postgres = Postgres("postgres_maslabot")
     try:
