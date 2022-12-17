@@ -149,7 +149,7 @@ def sentiment_tweet(**context):
                              , aws_secret_access_key=aws_details["aws_secret_access_key"],
                              aws_session_token=aws_details["aws_session_token"])
 
-    if float(median_sentiment)>0.1:
+    if float(median_sentiment)>0.2:
         s3_client.download_file("maslaton-moods", "bullish.jpeg", "/tmp/bullish.png")
         imagePath = "/tmp/bullish.png"
         status = f"""Masla status: bullish ({median_sentiment})"""
