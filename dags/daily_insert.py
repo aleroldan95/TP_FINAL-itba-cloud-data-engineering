@@ -1,11 +1,6 @@
 import pandas as pd
-# import config   # No lo ta leyendo
-#SQL
-import mysql.connector
-from mysql.connector import errorcode
-from sqlalchemy import create_engine
 from airflow.operators.python import PythonOperator
-from airflow import DAG
+from airflow import DAG, Variable
 from postgres import Postgres
 import sqlalchemy.exc
 from sentiment_analysis_spanish import sentiment_analysis
@@ -17,17 +12,19 @@ import tweepy
 import datetime as dt
 print(tweepy.__version__)
 
-credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
-'consumer_secret' : "jVyQ4OpqAWr2EnNdqHWYKhvqqaaoJiZOV2WqNw5ZlIioJftGgJ",
-'access_token' : "1545748698965200902-aHhEz4NIqhjAsNHcC4ORvVg6bMTdiH",
-'access_token_secret' : "oBF6mPb9E95W6QXSXDKD2yyM0qsBJ7xrm5LRQmGLtid0m"}
+#credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
+#'consumer_secret' : "jVyQ4OpqAWr2EnNdqHWYKhvqqaaoJiZOV2WqNw5ZlIioJftGgJ",
+#'access_token' : "1545748698965200902-aHhEz4NIqhjAsNHcC4ORvVg6bMTdiH",
+#'access_token_secret' : "oBF6mPb9E95W6QXSXDKD2yyM0qsBJ7xrm5LRQmGLtid0m"}
 
 userID = 'CarlosMaslaton'
 
 SQL_TABLE='masla_tweets'
 
 def tweet_downloader(userID, from_date, credentials):
+    print(f'Download prints from: {from_date}')
     # Authorize our Twitter credentials
+    credentials = Variable.get("credentials")
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
     api = tweepy.API(auth)
@@ -66,6 +63,8 @@ def tweet_downloader(userID, from_date, credentials):
         if i.created_at > since_date:
             filtered.append(i)
 
+    print(f'Downloaded {len(filtered)} tweets')
+
     return filtered
 
 
@@ -74,6 +73,7 @@ def dag_tweet_downloader(**context):
         "%Y-%m-%d"
     )
     # Authorize our Twitter credentials
+    credentials = Variable.get("credentials")
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
     api = tweepy.API(auth)
@@ -161,4 +161,4 @@ with DAG(
         python_callable=insert_sentiment
     )
 
-    dag_tweet_downloader >> [insert_tweet,insert_sentiment]
+    dag_tweet_downloader >> insert_tweet >> insert_sentiment
