@@ -6,7 +6,8 @@ from mysql.connector import errorcode
 from sqlalchemy import create_engine
 from airflow.operators.python import PythonOperator
 from airflow import DAG
-from dags.postgres import Postgres
+from postgres import Postgres
+import sqlalchemy.exc
 
 from datetime import datetime, timedelta
 
@@ -24,7 +25,6 @@ userID = 'CarlosMaslaton'
 from_date = (datetime.now() + timedelta(days=-1)).date().strftime('%Y-%m-%d')
 
 SQL_TABLE='masla_tweets'
-
 
 def tweet_downloader(userID, from_date, credentials):
     # Authorize our Twitter credentials
@@ -86,7 +86,8 @@ def insert_tweet(**context):
         task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
         orient="index",
     ).T
-    df_tweets = df_tweets[['index', 'Id', 'Created_On', 'text']]
+    df_tweets.rename(columns={"Created_On": "date", "Id": "id"})
+    df_tweets = df_tweets[['id', 'date', 'text']]
     # Appending Data to database:
     postgres = Postgres("postgres_maslabot")
     try:
