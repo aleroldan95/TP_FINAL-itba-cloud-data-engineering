@@ -10,7 +10,7 @@ class StockValue(Base):
     """Stock value data model."""
 
     __tablename__ = "masla_tweets"
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True)
     date = Column(Date)
     text = Column(String)
     __table_args__ = (UniqueConstraint("id", "date"),)
