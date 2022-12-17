@@ -14,10 +14,6 @@ import tweepy
 import datetime as dt
 print(tweepy.__version__)
 
-#credentials = {'consumer_key': "aiwD3XSHIHBfCeohJSvRU7kpw",
-#'consumer_secret' : "jVyQ4OpqAWr2EnNdqHWYKhvqqaaoJiZOV2WqNw5ZlIioJftGgJ",
-#'access_token' : "1545748698965200902-aHhEz4NIqhjAsNHcC4ORvVg6bMTdiH",
-#'access_token_secret' : "oBF6mPb9E95W6QXSXDKD2yyM0qsBJ7xrm5LRQmGLtid0m"}
 
 userID = 'CarlosMaslaton'
 
@@ -26,8 +22,7 @@ SQL_TABLE='masla_tweets'
 def tweet_downloader(userID, from_date):
     print(f'Download prints from: {from_date}')
     # Authorize our Twitter credentials
-    credentials = Variable.get("credentials")
-    credentials = json.loads(credentials)
+    credentials = json.loads(Variable.get("credentials"))
 
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
@@ -77,10 +72,7 @@ def dag_tweet_downloader(**context):
         "%Y-%m-%d"
     )
     # Authorize our Twitter credentials
-    credentials = Variable.get("credentials")
-    print(credentials)
-    credentials = json.loads(credentials)
-    print(credentials)
+    credentials = json.loads(Variable.get("credentials"))
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
     api = tweepy.API(auth)
