@@ -1,6 +1,7 @@
 import pandas as pd
 from airflow.operators.python import PythonOperator
-from airflow import DAG, Variable
+from airflow import DAG
+from airflow.models import Variable
 from postgres import Postgres
 import sqlalchemy.exc
 from sentiment_analysis_spanish import sentiment_analysis
