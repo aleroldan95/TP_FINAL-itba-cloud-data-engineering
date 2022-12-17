@@ -7,7 +7,7 @@ from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.engine import Engine
 from models import Base
 
-default_args = {"owner": "ale", "retries": 0, "retry_delay": timedelta(minutes=0)}
+default_args = {"owner": "lospi", "retries": 0, "retry_delay": timedelta(minutes=0)}
 
 
 def create_table_if_not_exists():
