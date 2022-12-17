@@ -107,7 +107,7 @@ default_args = {"owner": "lospi", "retries": 0, "retry_delay": timedelta(minutes
 with DAG(
     dag_id="insert_daily_tweet",
     default_args=default_args,
-    start_date=datetime(2022, 12, 6),
+    start_date=datetime(2022, 12, 17),
     schedule_interval="0 10 * * *",
 ) as dag:
 

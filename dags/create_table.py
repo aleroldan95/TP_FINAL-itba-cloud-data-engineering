@@ -16,6 +16,9 @@ def create_table_if_not_exists():
     table_names: [str] = pg_inspector.get_table_names(schema="maslabot")
     if "masla_tweets" not in table_names:
         Base.metadata.create_all(pg_engine)
+        print('New Table Created')
+    else:
+        print('Table already exits')
 
 
 with DAG(
