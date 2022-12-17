@@ -26,9 +26,7 @@ def tweet_downloader(userID, from_date):
     print(f'Download prints from: {from_date}')
     # Authorize our Twitter credentials
     credentials = Variable.get("credentials")
-    print(credentials)
-    credentials = dict(credentials)
-    print(credentials)
+
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
     api = tweepy.API(auth)
@@ -78,6 +76,9 @@ def dag_tweet_downloader(**context):
     )
     # Authorize our Twitter credentials
     credentials = Variable.get("credentials")
+    print(credentials)
+    credentials = dict(credentials)
+    print(credentials)
     auth = tweepy.OAuthHandler(credentials['consumer_key'], credentials['consumer_secret'])
     auth.set_access_token(credentials['access_token'], credentials['access_token_secret'])
     api = tweepy.API(auth)
