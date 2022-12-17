@@ -87,8 +87,10 @@ def insert_tweet(**context):
         orient="index",
     ).T
     print(df_tweets)
-    df_tweets.rename(columns={"Created_On": "date", "Id": "id"})
+    print(df_tweets.columns)
+    df_tweets.rename(columns={"Created_On": "date", "Id": "id"}, inplace=True)
     print(df_tweets)
+    print(df_tweets.columns)
     df_tweets = df_tweets[['id', 'date', 'text']]
     print(df_tweets)
     # Appending Data to database:
