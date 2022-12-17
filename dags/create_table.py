@@ -14,11 +14,11 @@ def create_table_if_not_exists():
     pg_engine: Engine = pg_hook.get_sqlalchemy_engine()
     pg_inspector: Inspector = inspect(pg_engine)
     table_names: [str] = pg_inspector.get_table_names(schema="maslabot")
-    if "masla_tweets" not in table_names:
+    if "masla_tweets" not in table_names and "masla_sentiment" not in table_names :
         Base.metadata.create_all(pg_engine)
-        print('New Table Created')
+        print('New Tables Created')
     else:
-        print('Table already exits')
+        print('Tables already exits')
 
 
 with DAG(

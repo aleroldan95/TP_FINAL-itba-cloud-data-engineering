@@ -8,6 +8,7 @@ from airflow.operators.python import PythonOperator
 from airflow import DAG
 from postgres import Postgres
 import sqlalchemy.exc
+from sentiment_analysis_spanish import sentiment_analysis
 
 from datetime import datetime, timedelta
 
@@ -95,13 +96,8 @@ def insert_tweet(**context):
         task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
         orient="index",
     ).T
-    print(df_tweets)
-    print(df_tweets.columns)
     df_tweets.rename(columns={"Created_On": "date", "Id": "id"}, inplace=True)
-    print(df_tweets)
-    print(df_tweets.columns)
     df_tweets = df_tweets[['id', 'date', 'text']]
-    print(df_tweets)
     # Appending Data to database:
     postgres = Postgres("postgres_maslabot")
     try:
@@ -110,12 +106,37 @@ def insert_tweet(**context):
         )
         print(f"Inserted {len(df_tweets)} records")
     except sqlalchemy.exc.IntegrityError:
-        # You can avoid doing this by setting a trigger rule in the reports operator
         print("Data already exists! Nothing to do...")
 
     #engine = create_engine(
     #    "mysql+mysqlconnector://{user}:{pwd}@{host}/{db}".format(user=user, pwd=passwd, host=host, db=db_name))
     #df_tweets.to_sql(db_name, con=engine, if_exists='append')
+
+def insert_sentiment(**context):
+    task_instance = context["ti"]
+    df_tweets = pd.read_json(
+        task_instance.xcom_pull(task_ids='dag_tweet_downloader'),
+        orient="index",
+    ).T
+    df_tweets.rename(columns={"Created_On": "date", "Id": "id"}, inplace=True)
+    df_tweets = df_tweets[['id', 'text']]
+    #Adding Sentiment
+    sentiment = sentiment_analysis.SentimentAnalysisSpanish()
+    sentiment_column = []
+    for index, row in df_tweets.iterrows():
+        sentiment_column.append(sentiment.sentiment(row['text']))
+    df_tweets['sentiment'] = sentiment_column
+    df_tweets = df_tweets[['id', 'sentiment']]
+    # Appending Data to database:
+    postgres = Postgres("postgres_maslabot")
+    try:
+        postgres.insert_from_frame(
+            df=df_tweets, table='masla_sentiment', if_exists="append", index=False
+        )
+        print(f"Inserted {len(df_tweets)} records")
+    except sqlalchemy.exc.IntegrityError:
+        print("Data already exists! Nothing to do...")
+
 
 default_args = {"owner": "lospi", "retries": 0, "retry_delay": timedelta(minutes=0)}
 with DAG(
@@ -135,4 +156,9 @@ with DAG(
         python_callable=insert_tweet
     )
 
-    dag_tweet_downloader >> insert_tweet
+    insert_sentiment = PythonOperator(
+        task_id="insert_sentiment",
+        python_callable=insert_sentiment
+    )
+
+    dag_tweet_downloader >> [insert_tweet,insert_sentiment]
