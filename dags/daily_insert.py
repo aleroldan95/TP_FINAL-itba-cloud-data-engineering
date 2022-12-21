@@ -192,4 +192,4 @@ with DAG(
         python_callable=sentiment_tweet
     )
 
-    dag_tweet_downloader >> [insert_tweet,insert_sentiment] >> sentiment_tweet
+    dag_tweet_downloader >> insert_tweet >> insert_sentiment >> sentiment_tweet
