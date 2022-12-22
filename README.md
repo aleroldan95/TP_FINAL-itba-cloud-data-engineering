@@ -2,7 +2,7 @@
 
 ### **Objetivo**
 
-Definir si Masla está feliz o triste
+Definir si Masla está feliz o triste mediante proceso de descarga, análisis de sentimiento y almacenamiento diario de tweet
 
 ### **Metodología**
 
@@ -25,7 +25,7 @@ Definir si Masla está feliz o triste
 
 
 ### Diagrama de proceso
-![Diagrama Proceso](https://github.com/aleroldan95/TP_FINAL-itba-cloud-data-engineering/blob/master/Diagrama_TP_final.jpg?raw=true)
+![Diagrama Proceso](https://github.com/aleroldan95/TP_FINAL-itba-cloud-data-engineering/blob/master/imagenes/Diagrama_TP_final.jpg)
 
 Alogamos ariflow en un EC2 mediano, luego mediante la API de tweeter nos descargamos los tweets del día de la fecha de Masla. 
 Como próximo paso procedemos a guardar dichos tweets en una base de datos relacional de RDS (previamente creada con 
@@ -44,3 +44,10 @@ Como librerías importantes utilizamos las siguientes:
 - [sentiment-spanish](https://pypi.org/project/sentiment-analysis-spanish/): librería que contiene un modelo ya entrenado de sentiment análisis en español. Debido a la dificultad de
 encontrar una base de datos apropiada en español para poder entrenar nuestro propio modelo, preferimos utilizar esta librería 
   con el modelo ya entrenado 
+
+
+### Resultado
+
+A modo de ejemplo vemos un tweet final del proceso
+
+![tweet_final](https://github.com/aleroldan95/TP_FINAL-itba-cloud-data-engineering/blob/master/imagenes/tweet_result.jpg)
